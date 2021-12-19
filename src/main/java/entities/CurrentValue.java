@@ -23,6 +23,18 @@ public class CurrentValue {
     @Column(name = "mean_value", nullable = false)
     private Integer meanValue;
 
+    public CurrentValue(Integer id, Integer buyValue, Integer sellValue, Source source, Integer meanValue) {
+        this.id = id;
+        this.buyValue = buyValue;
+        this.sellValue = sellValue;
+        this.source = source;
+        this.meanValue = meanValue;
+    }
+
+    public CurrentValue() {
+
+    }
+
     public Integer getMeanValue() {
         return meanValue;
     }
