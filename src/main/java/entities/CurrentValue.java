@@ -2,23 +2,34 @@ package entities;
 
 import javax.persistence.*;
 
-@Table(name = "\"public.currentValue\"")
 @Entity
+@Table(name = "current_value")
 public class CurrentValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "buyValue")
+    @Column(name = "buy_value", nullable = false)
     private Integer buyValue;
 
-    @Column(name = "sellValue")
+    @Column(name = "sell_value", nullable = false)
     private Integer sellValue;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "sourceId")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "source_id", nullable = false)
     private Source source;
+
+    @Column(name = "mean_value", nullable = false)
+    private Integer meanValue;
+
+    public Integer getMeanValue() {
+        return meanValue;
+    }
+
+    public void setMeanValue(Integer meanValue) {
+        this.meanValue = meanValue;
+    }
 
     public Source getSource() {
         return source;
@@ -50,5 +61,16 @@ public class CurrentValue {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "CurrentValue{" +
+                "id=" + id +
+                ", buyValue=" + buyValue +
+                ", sellValue=" + sellValue +
+                ", source=" + source +
+                ", meanValue=" + meanValue +
+                '}';
     }
 }

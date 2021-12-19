@@ -2,35 +2,27 @@ package entities;
 
 import javax.persistence.*;
 
-@Table(name = "\"public.dailyValues\"")
 @Entity
+@Table(name = "daily_values")
 public class DailyValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "buyValue")
+    @Column(name = "buy_value", nullable = false)
     private Integer buyValue;
 
-    @Column(name = "sellValue")
+    @Column(name = "sell_value", nullable = false)
     private Integer sellValue;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "currencyId")
-    private Currency currency;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "sourceId")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "source_id", nullable = false)
     private Source source;
 
-    public Source getSource() {
-        return source;
-    }
-
-    public void setSource(Source source) {
-        this.source = source;
-    }
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "currency_id", nullable = false)
+    private Currency currency;
 
     public Currency getCurrency() {
         return currency;
@@ -38,6 +30,14 @@ public class DailyValue {
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public void setSource(Source source) {
+        this.source = source;
     }
 
     public Integer getSellValue() {
@@ -62,5 +62,16 @@ public class DailyValue {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "DailyValue{" +
+                "id=" + id +
+                ", buyValue=" + buyValue +
+                ", sellValue=" + sellValue +
+                ", source=" + source +
+                ", currency=" + currency +
+                '}';
     }
 }

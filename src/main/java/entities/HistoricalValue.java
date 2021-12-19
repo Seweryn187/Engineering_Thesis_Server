@@ -1,35 +1,34 @@
 package entities;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
-@Table(name = "\"public.historicalValues\"")
 @Entity
+@Table(name = "historical_value")
 public class HistoricalValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "meanValue")
+    @Column(name = "mean_value", nullable = false)
     private Integer meanValue;
 
-    @Column(name = "meanBuyValue")
+    @Column(name = "mean_buy_value", nullable = false)
     private Integer meanBuyValue;
 
-    @Column(name = "meanSellValue")
+    @Column(name = "mean_sell_value", nullable = false)
     private Integer meanSellValue;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "date")
-    private Date date;
+    @Column(name = "date", nullable = false)
+    private LocalDate date;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "sourceId")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "source_id", nullable = false)
     private Source source;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "currencyId")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "currency_id", nullable = false)
     private Currency currency;
 
     public Currency getCurrency() {
@@ -48,11 +47,11 @@ public class HistoricalValue {
         this.source = source;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
@@ -86,5 +85,18 @@ public class HistoricalValue {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "HistoricalValue{" +
+                "id=" + id +
+                ", meanValue=" + meanValue +
+                ", meanBuyValue=" + meanBuyValue +
+                ", meanSellValue=" + meanSellValue +
+                ", date=" + date +
+                ", source=" + source +
+                ", currency=" + currency +
+                '}';
     }
 }

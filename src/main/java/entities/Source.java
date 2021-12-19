@@ -2,18 +2,18 @@ package entities;
 
 import javax.persistence.*;
 
-@Table(name = "\"public.sources\"")
 @Entity
+@Table(name = "sources")
 public class Source {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "type")
+    @Column(name = "type", nullable = false)
     private String type;
 
     public String getType() {
@@ -38,5 +38,14 @@ public class Source {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Source{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                '}';
     }
 }
