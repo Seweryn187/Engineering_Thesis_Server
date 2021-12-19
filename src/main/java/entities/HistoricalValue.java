@@ -2,6 +2,7 @@ package entities;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Table(name = "historical_value")
@@ -21,7 +22,7 @@ public class HistoricalValue {
     private Integer meanSellValue;
 
     @Column(name = "date", nullable = false)
-    private LocalDate date;
+    private Date date;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "source_id", nullable = false)
@@ -30,6 +31,18 @@ public class HistoricalValue {
     @ManyToOne(optional = false)
     @JoinColumn(name = "currency_id", nullable = false)
     private Currency currency;
+
+    public HistoricalValue() {
+    }
+
+    public HistoricalValue(Integer meanValue, Integer meanBuyValue, Integer meanSellValue, Date date, Source source, Currency currency) {
+        this.meanValue = meanValue;
+        this.meanBuyValue = meanBuyValue;
+        this.meanSellValue = meanSellValue;
+        this.date = date;
+        this.source = source;
+        this.currency = currency;
+    }
 
     public Currency getCurrency() {
         return currency;
@@ -47,11 +60,11 @@ public class HistoricalValue {
         this.source = source;
     }
 
-    public LocalDate getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

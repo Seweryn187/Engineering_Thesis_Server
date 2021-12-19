@@ -1,6 +1,7 @@
 package entities;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "current_value")
@@ -23,16 +24,28 @@ public class CurrentValue {
     @Column(name = "mean_value", nullable = false)
     private Integer meanValue;
 
-    public CurrentValue(Integer id, Integer buyValue, Integer sellValue, Source source, Integer meanValue) {
+    @Column(name = "date", nullable = false)
+    private Date date;
+
+    public CurrentValue(Integer id, Integer buyValue, Integer sellValue, Source source, Integer meanValue, Date date) {
         this.id = id;
         this.buyValue = buyValue;
         this.sellValue = sellValue;
         this.source = source;
         this.meanValue = meanValue;
+        this.date = date;
     }
 
     public CurrentValue() {
 
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public Integer getMeanValue() {
@@ -83,6 +96,7 @@ public class CurrentValue {
                 ", sellValue=" + sellValue +
                 ", source=" + source +
                 ", meanValue=" + meanValue +
+                ", date=" + date +
                 '}';
     }
 }
