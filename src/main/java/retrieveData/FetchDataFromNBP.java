@@ -7,6 +7,8 @@ import entities.Source;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -32,6 +34,7 @@ public class FetchDataFromNBP {
     private final CurrentValueRepository currentValueRepository;
     private final HistoricalValueRepository historicalValueRepository;
     private WebClient webClient;
+    private static final Logger log = LoggerFactory.getLogger(FetchDataFromNBP.class);
 
     @Autowired
     public FetchDataFromNBP(CurrencyRepository currencyRepository, CurrentValueRepository currentValueRepository, HistoricalValueRepository historicalValueRepository) {
@@ -75,7 +78,7 @@ public class FetchDataFromNBP {
 
                         CurrentValue newValue = new CurrentValue(id, buyValue, sellValue, source, meanValue, date);
                         CurrentValue addedValue = this.currentValueRepository.save(newValue);
-                        System.out.println("I've fetched new value: " + addedValue);
+                        log.info("I've fetched new value: " + addedValue);
                         if(addedValue != null){
                             ++recordCount;
                         }
@@ -86,7 +89,7 @@ public class FetchDataFromNBP {
                     break;
                 }
             } catch (Exception ex) {
-                System.out.println("Error getting current value from NBP " + ex.getMessage());
+                log.error("Error getting current value from NBP " + ex.getMessage());
                 if(++triesCount == maxTries) throw ex;
             }
         }
@@ -140,13 +143,13 @@ public class FetchDataFromNBP {
 
                     HistoricalValue oldValue = new HistoricalValue(meanValue, buyValue, sellValue, date, source, currency);
                     HistoricalValue archivedRecord = this.historicalValueRepository.save(oldValue);
-                    System.out.println("I've archived value: " + archivedRecord);
+                    log.info("I've archived value: " + archivedRecord);
                     if(archivedRecord != null){
                         break;
                     }
                 }
             } catch (Exception ex) {
-                System.out.println("Error archiving value in database: " + ex.getMessage());
+                log.error("Error archiving value in database: " + ex.getMessage());
                 if(++count == maxTries) throw ex;
             }
         }
