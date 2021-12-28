@@ -1,7 +1,5 @@
-package retrieveData;
+package retrieve.data;
 
-import alerts.CurrentValueChangedEvent;
-import alerts.EmailData;
 import alerts.SendAlerts;
 import entities.*;
 import io.netty.channel.ChannelOption;
@@ -10,16 +8,13 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
-import repositories.AlertRepository;
 import repositories.CurrencyRepository;
 import repositories.CurrentValueRepository;
 import repositories.HistoricalValueRepository;
