@@ -3,7 +3,7 @@ package com.server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
@@ -12,11 +12,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
-@SpringBootApplication(scanBasePackages = {"com.server", "repositories", "entities", "retrieveData", "alerts"})
-@EnableJpaRepositories("repositories")
-@EntityScan("entities")
+@SpringBootApplication(scanBasePackages = {"com.server", "com.server.repositories", "com.server.entities", "com.server.data",
+        "com.server.alerts", "com.server.services", "com.server.controllers"})
+@EnableJpaRepositories("com.server.repositories")
+@EntityScan("com/server/entities")
 @EnableAsync
 @Configuration
+@ComponentScan(basePackages = {"com.server.services", "com.server.controllers", "com.server.repositories"})
 public class ServerApplication implements AsyncConfigurer {
 
     public static void main(String[] args) {
@@ -33,5 +35,4 @@ public class ServerApplication implements AsyncConfigurer {
         executor.initialize();
         return executor;
     }
-
 }
