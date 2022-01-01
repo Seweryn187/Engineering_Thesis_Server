@@ -31,20 +31,20 @@ public class SendAlerts {
         for (Alert alert : this.alertRepository.findAlertByCurrencyAbbr(currencyRecord.getAbbr())) {
 
                 if (alert.getIncrease() &&
-                        (alert.getAlertValue() < newValue.getBuyValue() || alert.getAlertValue() < newValue.getSellValue())) {
+                        (alert.getAlertValue() < newValue.getBidValue() || alert.getAlertValue() < newValue.getAskValue())) {
                     EmailData emailData = new EmailData(
-                            newValue.getSellValue(),
-                            newValue.getBuyValue(),
+                            newValue.getAskValue(),
+                            newValue.getBidValue(),
                             currencyRecord.getAbbr(),
                             alert.getUser().getEmail(),
                             "increased");
                     publisher.publishEvent(new CurrentValueChangedEvent(emailData));
                     
                 } else if (!alert.getIncrease() &&
-                        (alert.getAlertValue() > newValue.getBuyValue() || alert.getAlertValue() > newValue.getSellValue())) {
+                        (alert.getAlertValue() > newValue.getBidValue() || alert.getAlertValue() > newValue.getAskValue())) {
                     EmailData emailData = new EmailData(
-                            newValue.getSellValue(), 
-                            newValue.getBuyValue(),
+                            newValue.getAskValue(),
+                            newValue.getBidValue(),
                             currencyRecord.getAbbr(), 
                             alert.getUser().getEmail(),
                             "decreased");

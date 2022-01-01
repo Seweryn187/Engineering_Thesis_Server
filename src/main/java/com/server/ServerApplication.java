@@ -12,13 +12,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
-@SpringBootApplication(scanBasePackages = {"com.server", "com.server.repositories", "com.server.entities", "com.server.data",
-        "com.server.alerts", "com.server.services", "com.server.controllers"})
+@SpringBootApplication(scanBasePackages = {"com.server", "com.server.repositories", "com.server.entities"
+        ,"com.server.services", "com.server.controllers"})
 @EnableJpaRepositories("com.server.repositories")
 @EntityScan("com/server/entities")
 @EnableAsync
 @Configuration
-@ComponentScan(basePackages = {"com.server.services", "com.server.controllers", "com.server.repositories"})
+@ComponentScan(basePackages = {"com.server.services", "com.server.controllers", "com.server.repositories", "com.server.data", "com.server.alerts", "com.server.utility"})
 public class ServerApplication implements AsyncConfigurer {
 
     public static void main(String[] args) {

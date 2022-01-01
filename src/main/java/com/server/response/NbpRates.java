@@ -1,12 +1,13 @@
 package com.server.response;
 
 
+import java.time.LocalDate;
 import java.util.Date;
 
 
 public class NbpRates {
     private String no;
-    private Date effectiveDate;
+    private LocalDate effectiveDate;
     private float bid;
     private float ask;
 
@@ -18,11 +19,11 @@ public class NbpRates {
         this.no = no;
     }
 
-    public Date getEffectiveDate() {
+    public LocalDate getEffectiveDate() {
         return effectiveDate;
     }
 
-    public void setEffectiveDate(Date effectiveDate) {
+    public void setEffectiveDate(LocalDate effectiveDate) {
         this.effectiveDate = effectiveDate;
     }
 

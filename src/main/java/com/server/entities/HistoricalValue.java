@@ -1,6 +1,7 @@
 package com.server.entities;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -14,14 +15,14 @@ public class HistoricalValue {
     @Column(name = "mean_value", nullable = false)
     private Integer meanValue;
 
-    @Column(name = "mean_buy_value", nullable = false)
-    private Integer meanBuyValue;
+    @Column(name = "mean_bid_value", nullable = false)
+    private Integer meanBidValue;
 
-    @Column(name = "mean_sell_value", nullable = false)
-    private Integer meanSellValue;
+    @Column(name = "mean_ask_value", nullable = false)
+    private Integer meanAskValue;
 
     @Column(name = "date", nullable = false)
-    private Date date;
+    private LocalDate date;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "source_id", nullable = false)
@@ -31,16 +32,21 @@ public class HistoricalValue {
     @JoinColumn(name = "currency_id", nullable = false)
     private Currency currency;
 
+    @Column(name = "spread")
+    private Integer spread;
+
     public HistoricalValue() {
     }
 
-    public HistoricalValue(Integer meanValue, Integer meanBuyValue, Integer meanSellValue, Date date, Source source, Currency currency) {
+    public HistoricalValue(Integer id, Integer meanValue, Integer meanBidValue, Integer meanAskValue, LocalDate date, Source source, Currency currency, Integer spread) {
+        this.id = id;
         this.meanValue = meanValue;
-        this.meanBuyValue = meanBuyValue;
-        this.meanSellValue = meanSellValue;
+        this.meanBidValue = meanBidValue;
+        this.meanAskValue = meanAskValue;
         this.date = date;
         this.source = source;
         this.currency = currency;
+        this.spread = spread;
     }
 
     public Currency getCurrency() {
@@ -59,28 +65,28 @@ public class HistoricalValue {
         this.source = source;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public Integer getMeanSellValue() {
-        return meanSellValue;
+    public Integer getMeanBidValue() {
+        return meanBidValue;
     }
 
-    public void setMeanSellValue(Integer meanSellValue) {
-        this.meanSellValue = meanSellValue;
+    public void setMeanBidValue(Integer meanBidValue) {
+        this.meanBidValue = meanBidValue;
     }
 
-    public Integer getMeanBuyValue() {
-        return meanBuyValue;
+    public Integer getMeanAskValue() {
+        return meanAskValue;
     }
 
-    public void setMeanBuyValue(Integer meanBuyValue) {
-        this.meanBuyValue = meanBuyValue;
+    public void setMeanAskValue(Integer meanAskValue) {
+        this.meanAskValue = meanAskValue;
     }
 
     public Integer getMeanValue() {
@@ -99,16 +105,25 @@ public class HistoricalValue {
         this.id = id;
     }
 
+    public Integer getSpread() {
+        return spread;
+    }
+
+    public void setSpread(Integer spread) {
+        this.spread = spread;
+    }
+
     @Override
     public String toString() {
         return "HistoricalValue{" +
                 "id=" + id +
                 ", meanValue=" + meanValue +
-                ", meanBuyValue=" + meanBuyValue +
-                ", meanSellValue=" + meanSellValue +
+                ", meanBidValue=" + meanBidValue +
+                ", meanAskValue=" + meanAskValue +
                 ", date=" + date +
                 ", source=" + source +
                 ", currency=" + currency +
+                ", spread=" + spread +
                 '}';
     }
 }

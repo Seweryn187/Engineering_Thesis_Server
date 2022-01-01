@@ -4,7 +4,8 @@ import com.server.alerts.SendAlerts;
 import com.server.entities.Currency;
 import com.server.entities.CurrentValue;
 import com.server.entities.HistoricalValue;
-import com.server.entities.Source;
+
+import com.server.utility.Utility;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -24,8 +26,10 @@ import com.server.response.NbpResponse;
 
 import java.time.Duration;
 
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static com.server.utility.Utility.calculateSpread;
+import static com.server.utility.Utility.castFloatToInt;
 
 @EnableScheduling
 @Service
@@ -53,14 +57,9 @@ public class FetchDataFromNBP {
     start, in this case every day in working week at 2:00 am
     */
     @Transactional
-    //@Scheduled(fixedRate = 100000)
+    @Scheduled(fixedRate = 100000)
     public void saveNewCurrentValue() {
-        int id;
-        int meanValue;
-        int buyValue;
-        int sellValue;
-        Source source;
-        Date date;
+        CurrentValue newCurrentValue = new CurrentValue();
         int triesCount = 0;
         int maxTries = 3;
         int recordCount = 0;
@@ -76,16 +75,18 @@ public class FetchDataFromNBP {
                     if (response != null) {
                         archiveCurrentValue(record);
 
-                        id = record.getCurrentValue().getId();
-                        buyValue = (int) (response.getRates().get(0).getBid() * 1000); // Because in database I'm saving integer not a float value
-                        sellValue = (int) (response.getRates().get(0).getAsk() * 1000);
-                        meanValue = (int) (((response.getRates().get(0).getBid() + response.getRates().get(0).getAsk()) / 2) * 1000);
-                        source = record.getCurrentValue().getSource();
-                        date = response.getRates().get(0).getEffectiveDate();
+                        newCurrentValue.setId(record.getCurrentValue().getId());
+                        newCurrentValue.setBidValue(castFloatToInt(response.getRates().get(0).getBid())); // Because in database I'm saving integer not a float value
+                        newCurrentValue.setAskValue(castFloatToInt(response.getRates().get(0).getAsk()));
+                        newCurrentValue.setMeanValue(castFloatToInt((response.getRates().get(0).getBid() + response.getRates().get(0).getAsk())/2));
+                        newCurrentValue.setSource(record.getCurrentValue().getSource());
+                        newCurrentValue.setDate(response.getRates().get(0).getEffectiveDate());
+                        newCurrentValue.setSpread(calculateSpread(newCurrentValue.getAskValue(), newCurrentValue.getBidValue(), newCurrentValue.getMeanValue()));
+                        newCurrentValue.setAskIncrease(record.getCurrentValue().getAskValue() < response.getRates().get(0).getAsk());
+                        newCurrentValue.setBidIncrease(record.getCurrentValue().getBidValue() < response.getRates().get(0).getBid());
 
-                        CurrentValue newValue = new CurrentValue(id, buyValue, sellValue, source, meanValue, date);
-                        CurrentValue addedValue = this.currentValueRepository.save(newValue);
-                        sendAlerts.sendValueChangeAlerts(record, newValue);
+                        CurrentValue addedValue = this.currentValueRepository.save(newCurrentValue);
+                        sendAlerts.sendValueChangeAlerts(record, newCurrentValue);
                         log.info("I've fetched new value: " + addedValue);
                         if(addedValue != null){
                             ++recordCount;
@@ -131,26 +132,22 @@ public class FetchDataFromNBP {
 
     @Transactional
     public void archiveCurrentValue(Currency record) {
-        int meanValue;
-        int buyValue;
-        int sellValue;
-        Source source;
-        Currency currency;
-        Date date;
         int count = 0;
         int maxTries = 3;
+        int spread;
 
         while(count < maxTries) {
             try {
                 if (record != null) {
-                    meanValue = record.getCurrentValue().getMeanValue();
-                    buyValue = record.getCurrentValue().getBuyValue();
-                    sellValue = record.getCurrentValue().getSellValue();
-                    source = record.getCurrentValue().getSource();
-                    currency = record;
-                    date = record.getCurrentValue().getDate();
+                    HistoricalValue oldValue = new HistoricalValue();
+                    oldValue.setMeanValue(record.getCurrentValue().getMeanValue());
+                    oldValue.setMeanBidValue(record.getCurrentValue().getBidValue());
+                    oldValue.setMeanAskValue(record.getCurrentValue().getAskValue());
+                    oldValue.setSource(record.getCurrentValue().getSource());
+                    oldValue.setCurrency(record);
+                    oldValue.setDate(record.getCurrentValue().getDate());
+                    oldValue.setSpread(record.getCurrentValue().getSpread());
 
-                    HistoricalValue oldValue = new HistoricalValue(meanValue, buyValue, sellValue, date, source, currency);
                     HistoricalValue archivedRecord = this.historicalValueRepository.save(oldValue);
                     log.info("I've archived value: " + archivedRecord);
                     if(archivedRecord != null){
@@ -163,4 +160,6 @@ public class FetchDataFromNBP {
             }
         }
     }
+
+
 }
