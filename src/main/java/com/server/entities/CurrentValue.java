@@ -2,8 +2,6 @@ package com.server.entities;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
 
 @Entity
 @Table(name = "current_value")
@@ -38,11 +36,15 @@ public class CurrentValue {
     @Column(name = "bid_increase")
     private Boolean bidIncrease;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "currency_id", nullable = false)
+    private Currency currency;
+
     public CurrentValue() {
 
     }
 
-    public CurrentValue(Integer id, Integer askValue, Integer bidValue, Source source, Integer meanValue, LocalDate date, Integer spread, Boolean askIncrease, Boolean bidIncrease) {
+    public CurrentValue(Integer id, Integer askValue, Integer bidValue, Source source, Integer meanValue, LocalDate date, Integer spread, Boolean askIncrease, Boolean bidIncrease, Currency currency) {
         this.id = id;
         this.askValue = askValue;
         this.bidValue = bidValue;
@@ -52,6 +54,15 @@ public class CurrentValue {
         this.spread = spread;
         this.askIncrease = askIncrease;
         this.bidIncrease = bidIncrease;
+        this.currency = currency;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 
     public LocalDate getDate() {
@@ -138,6 +149,7 @@ public class CurrentValue {
                 ", spread=" + spread +
                 ", askIncrease=" + askIncrease +
                 ", bidIncrease=" + bidIncrease +
+                ", currency=" + currency +
                 '}';
     }
 }

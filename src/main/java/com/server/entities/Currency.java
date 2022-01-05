@@ -16,18 +16,6 @@ public class Currency {
     @Column(name = "abbr", nullable = false, length = 3)
     private String abbr;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "current_value_id", nullable = false)
-    private CurrentValue currentValue;
-
-    public CurrentValue getCurrentValue() {
-        return currentValue;
-    }
-
-    public void setCurrentValue(CurrentValue currentValue) {
-        this.currentValue = currentValue;
-    }
-
     public String getAbbr() {
         return abbr;
     }
@@ -58,7 +46,6 @@ public class Currency {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", abbr='" + abbr + '\'' +
-                ", currentValue=" + currentValue +
                 '}';
     }
 }

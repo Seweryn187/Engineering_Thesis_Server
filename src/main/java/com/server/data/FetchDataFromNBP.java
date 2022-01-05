@@ -57,7 +57,7 @@ public class FetchDataFromNBP {
     start, in this case every day in working week at 2:00 am
     */
     @Transactional
-    @Scheduled(fixedRate = 100000)
+    //@Scheduled(fixedDelay = 100000)
     public void saveNewCurrentValue() {
         CurrentValue newCurrentValue = new CurrentValue();
         int triesCount = 0;
@@ -70,20 +70,22 @@ public class FetchDataFromNBP {
         while(triesCount < maxTries) {
             try {
                 log.info("-------------Getting new value and archiving old one (Sync)----------------");
-                for (Currency record : this.currencyRepository.findAll()) {
+
+                for (CurrentValue record : this.currentValueRepository.findCurrentValueBySourceName("The National Bank of Poland")) {
                     NbpResponse response = getCurrentValueFromNBP(record);
                     if (response != null) {
                         archiveCurrentValue(record);
 
-                        newCurrentValue.setId(record.getCurrentValue().getId());
+                        newCurrentValue.setId(record.getId());
                         newCurrentValue.setBidValue(castFloatToInt(response.getRates().get(0).getBid())); // Because in database I'm saving integer not a float value
                         newCurrentValue.setAskValue(castFloatToInt(response.getRates().get(0).getAsk()));
                         newCurrentValue.setMeanValue(castFloatToInt((response.getRates().get(0).getBid() + response.getRates().get(0).getAsk())/2));
-                        newCurrentValue.setSource(record.getCurrentValue().getSource());
+                        newCurrentValue.setSource(record.getSource());
                         newCurrentValue.setDate(response.getRates().get(0).getEffectiveDate());
                         newCurrentValue.setSpread(calculateSpread(newCurrentValue.getAskValue(), newCurrentValue.getBidValue(), newCurrentValue.getMeanValue()));
-                        newCurrentValue.setAskIncrease(record.getCurrentValue().getAskValue() < response.getRates().get(0).getAsk());
-                        newCurrentValue.setBidIncrease(record.getCurrentValue().getBidValue() < response.getRates().get(0).getBid());
+                        newCurrentValue.setAskIncrease(record.getAskValue() < response.getRates().get(0).getAsk());
+                        newCurrentValue.setBidIncrease(record.getBidValue() < response.getRates().get(0).getBid());
+                        newCurrentValue.setCurrency(record.getCurrency());
 
                         CurrentValue addedValue = this.currentValueRepository.save(newCurrentValue);
                         sendAlerts.sendValueChangeAlerts(record, newCurrentValue);
@@ -120,33 +122,32 @@ public class FetchDataFromNBP {
                 .build();
     }
 
-    public NbpResponse getCurrentValueFromNBP(Currency record) {
+    public NbpResponse getCurrentValueFromNBP(CurrentValue record) {
         String table = "c/"; // it comes from the structure of api request of NBP, this table has bought and sell value
         String format = "?format=json";
         return webClient.get()
-                .uri(table + record.getAbbr() + "/" + format)
+                .uri(table + record.getCurrency().getAbbr() + "/" + format)
                 .retrieve()
                 .bodyToMono(NbpResponse.class)
                 .block();
     }
 
     @Transactional
-    public void archiveCurrentValue(Currency record) {
+    public void archiveCurrentValue(CurrentValue record) {
         int count = 0;
         int maxTries = 3;
-        int spread;
 
         while(count < maxTries) {
             try {
                 if (record != null) {
                     HistoricalValue oldValue = new HistoricalValue();
-                    oldValue.setMeanValue(record.getCurrentValue().getMeanValue());
-                    oldValue.setMeanBidValue(record.getCurrentValue().getBidValue());
-                    oldValue.setMeanAskValue(record.getCurrentValue().getAskValue());
-                    oldValue.setSource(record.getCurrentValue().getSource());
-                    oldValue.setCurrency(record);
-                    oldValue.setDate(record.getCurrentValue().getDate());
-                    oldValue.setSpread(record.getCurrentValue().getSpread());
+                    oldValue.setMeanValue(record.getMeanValue());
+                    oldValue.setMeanBidValue(record.getBidValue());
+                    oldValue.setMeanAskValue(record.getAskValue());
+                    oldValue.setSource(record.getSource());
+                    oldValue.setCurrency(record.getCurrency());
+                    oldValue.setDate(record.getDate());
+                    oldValue.setSpread(record.getSpread());
 
                     HistoricalValue archivedRecord = this.historicalValueRepository.save(oldValue);
                     log.info("I've archived value: " + archivedRecord);

@@ -24,4 +24,6 @@ public class CurrencyController {
     public List<Currency> getAllCurrencies() {
         return this.currencyService.getAllCurrencies();
     }
+
+
 }

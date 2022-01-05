@@ -1,7 +1,6 @@
 package com.server.alerts;
 
 import com.server.entities.Alert;
-import com.server.entities.Currency;
 import com.server.entities.CurrentValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +26,15 @@ public class SendAlerts {
 
     @Async
     @Transactional
-    public void sendValueChangeAlerts(Currency currencyRecord, CurrentValue newValue) {
-        for (Alert alert : this.alertRepository.findAlertByCurrencyAbbr(currencyRecord.getAbbr())) {
+    public void sendValueChangeAlerts(CurrentValue currentValueRecord, CurrentValue newValue) {
+        for (Alert alert : this.alertRepository.findAlertByCurrencyAbbr(currentValueRecord.getCurrency().getAbbr())) {
 
                 if (alert.getIncrease() &&
                         (alert.getAlertValue() < newValue.getBidValue() || alert.getAlertValue() < newValue.getAskValue())) {
                     EmailData emailData = new EmailData(
                             newValue.getAskValue(),
                             newValue.getBidValue(),
-                            currencyRecord.getAbbr(),
+                            currentValueRecord.getCurrency().getAbbr(),
                             alert.getUser().getEmail(),
                             "increased");
                     publisher.publishEvent(new CurrentValueChangedEvent(emailData));
@@ -45,7 +44,7 @@ public class SendAlerts {
                     EmailData emailData = new EmailData(
                             newValue.getAskValue(),
                             newValue.getBidValue(),
-                            currencyRecord.getAbbr(), 
+                            currentValueRecord.getCurrency().getAbbr(),
                             alert.getUser().getEmail(),
                             "decreased");
                     publisher.publishEvent(new CurrentValueChangedEvent(emailData));
