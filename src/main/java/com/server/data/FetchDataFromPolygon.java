@@ -1,17 +1,17 @@
 package com.server.data;
 
 import com.server.alerts.SendAlerts;
-import com.server.entities.Currency;
 import com.server.entities.CurrentValue;
 import com.server.entities.HistoricalValue;
 
-import com.server.utility.Utility;
+import com.server.response.PolygonResponse;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,7 +22,6 @@ import reactor.netty.http.client.HttpClient;
 import com.server.repositories.CurrencyRepository;
 import com.server.repositories.CurrentValueRepository;
 import com.server.repositories.HistoricalValueRepository;
-import com.server.response.NbpResponse;
 
 import java.time.Duration;
 
@@ -34,19 +33,21 @@ import static com.server.utility.Utility.castFloatToInt;
 
 @EnableScheduling
 @Service
-public class FetchDataFromNBP {
+public class FetchDataFromPolygon {
 
     private final CurrencyRepository currencyRepository;
     private final CurrentValueRepository currentValueRepository;
     private final HistoricalValueRepository historicalValueRepository;
     private final SendAlerts sendAlerts;
     private WebClient webClient;
+    @Value("${polygon.apikey}")
+    private String apikey;
 
-    private static final Logger log = LoggerFactory.getLogger(FetchDataFromNBP.class);
+    private static final Logger log = LoggerFactory.getLogger(FetchDataFromPolygon.class);
 
     @Autowired
-    public FetchDataFromNBP(CurrencyRepository currencyRepository, CurrentValueRepository currentValueRepository,
-                            HistoricalValueRepository historicalValueRepository, SendAlerts sendAlerts) {
+    public FetchDataFromPolygon(CurrencyRepository currencyRepository, CurrentValueRepository currentValueRepository,
+                                HistoricalValueRepository historicalValueRepository, SendAlerts sendAlerts) {
         this.currencyRepository = currencyRepository;
         this.currentValueRepository = currentValueRepository;
         this.historicalValueRepository = historicalValueRepository;
@@ -63,9 +64,10 @@ public class FetchDataFromNBP {
         CurrentValue newCurrentValue = new CurrentValue();
         int triesCount = 0;
         int maxTries = 3;
-        int recordCount = 0;
+        int recordCount = 1;
         long recordAmount;
         LocalDate localDate = LocalDate.now();
+        LocalDate responseDate;
 
         buildClient();
         recordAmount = this.currencyRepository.count();
@@ -73,26 +75,35 @@ public class FetchDataFromNBP {
             try {
                 log.info("-------------Getting new value and archiving old one (Sync)----------------");
 
-                for (CurrentValue record : this.currentValueRepository.findCurrentValueBySourceName("The National Bank of Poland")) {
-                    NbpResponse response = getCurrentValueFromNBP(record);
+                for (CurrentValue record : this.currentValueRepository.findCurrentValueBySourceName("Polygon")) {
+                    if(recordCount%5 == 0){ // because api which I'm using only allows 5 requests per minute
+                        try {
+                            TimeUnit.MINUTES.sleep(1);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    PolygonResponse response = getCurrentValueFromAlphaVantage(record);
+
                     if (response != null) {
-                        if(response.getRates().get(0).getEffectiveDate().getDayOfMonth() != record.getDate().getDayOfMonth()){
+                        responseDate = response.getResults().get(0).getT().toLocalDateTime().toLocalDate();
+                        if(responseDate.getDayOfMonth() != record.getDate().getDayOfMonth()){
                             archiveCurrentValue(record);
                         }
 
                         newCurrentValue.setId(record.getId());
-                        newCurrentValue.setBidValue(castFloatToInt(response.getRates().get(0).getBid())); // Because in database I'm saving integer not a float value
-                        newCurrentValue.setAskValue(castFloatToInt(response.getRates().get(0).getAsk()));
-                        newCurrentValue.setMeanValue(castFloatToInt((response.getRates().get(0).getBid() + response.getRates().get(0).getAsk())/2));
+                        newCurrentValue.setBidValue(castFloatToInt(response.getResults().get(0).getL())); // Because in database I'm saving integer not a float value
+                        newCurrentValue.setAskValue(castFloatToInt(response.getResults().get(0).getH()));
+                        newCurrentValue.setMeanValue(castFloatToInt((response.getResults().get(0).getH() + response.getResults().get(0).getL())/2));
                         newCurrentValue.setSource(record.getSource());
-                        if(response.getRates().get(0).getEffectiveDate().getDayOfMonth() != localDate.getDayOfMonth()){
+                        if(responseDate.getDayOfMonth() != localDate.getDayOfMonth()){
                             newCurrentValue.setDate(localDate);
                         } else{
-                            newCurrentValue.setDate(response.getRates().get(0).getEffectiveDate());
+                            newCurrentValue.setDate(responseDate);
                         }
                         newCurrentValue.setSpread(calculateSpread(newCurrentValue.getAskValue(), newCurrentValue.getBidValue(), newCurrentValue.getMeanValue()));
-                        newCurrentValue.setAskIncrease(record.getAskValue() < response.getRates().get(0).getAsk());
-                        newCurrentValue.setBidIncrease(record.getBidValue() < response.getRates().get(0).getBid());
+                        newCurrentValue.setAskIncrease(record.getAskValue() < response.getResults().get(0).getH());
+                        newCurrentValue.setBidIncrease(record.getBidValue() < response.getResults().get(0).getL());
                         newCurrentValue.setCurrency(record.getCurrency());
 
                         CurrentValue addedValue = this.currentValueRepository.save(newCurrentValue);
@@ -105,11 +116,11 @@ public class FetchDataFromNBP {
                     }
                 }
                 log.info("-------------------End--------------------");
-                if(recordCount == recordAmount){
+                if(recordCount == recordAmount+1){
                     break;
                 }
             } catch (Exception ex) {
-                log.error("Error getting current value from NBP " + ex.getMessage());
+                log.error("Error getting current value from Polygon " + ex.getMessage());
                 if(++triesCount == maxTries) throw ex;
             }
 
@@ -128,17 +139,16 @@ public class FetchDataFromNBP {
 
         webClient = WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .baseUrl("https://api.nbp.pl/api/exchangerates/rates/")
+                .baseUrl("https://api.polygon.io")
                 .build();
     }
 
-    public NbpResponse getCurrentValueFromNBP(CurrentValue record) {
-        String table = "c/"; // it comes from the structure of api request of NBP, this table has bought and sell value
-        String format = "?format=json";
-        return webClient.get()
-                .uri(table + record.getCurrency().getAbbr() + "/" + format)
+    public PolygonResponse getCurrentValueFromAlphaVantage(CurrentValue record) {
+        String toCurrency = "PLN";
+        return webClient.get()//"&from_currency=" + record.getCurrency().getAbbr() + "&to_currency=" + toCurrency + "&apikey=" + apikey
+                .uri("/v2/aggs/ticker/C:"+record.getCurrency().getAbbr() + toCurrency + "/prev?adjusted=true&apiKey=" + apikey)
                 .retrieve()
-                .bodyToMono(NbpResponse.class)
+                .bodyToMono(PolygonResponse.class)
                 .block();
     }
 

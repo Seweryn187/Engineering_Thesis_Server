@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import com.server.services.HistoricalValueService;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -24,5 +26,20 @@ public class HistoricalValueController {
     @GetMapping("/historical-value/{abbr}")
     public List<HistoricalValue> getHistoricalValueByCurrencyAbbr(@PathVariable String abbr) {
         return historicalValueService.getAllHistoricalValueByCurrencyAbbr(abbr);
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @GetMapping("/historical-value/{abbr}/{source}")
+    public List<HistoricalValue> getHistoricalValueByCurrencyAbbrAndSourceName(@PathVariable String abbr, @PathVariable String source) {
+        System.out.println(historicalValueService.getAllHistoricalValueByCurrencyAbbrAndSourceName(abbr, source));
+        return historicalValueService.getAllHistoricalValueByCurrencyAbbrAndSourceName(abbr, source);
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @GetMapping("/historical-value/{abbr}/{source}/time")
+    public List<HistoricalValue> getAllHistoricalValueByCurrencyAbbrAndSourceNameAndDateBefore(@PathVariable String abbr,
+                                                                                          @PathVariable String source,
+                                                                                          LocalDate timePeriod) {
+        return historicalValueService.getAllHistoricalValueByCurrencyAbbrAndSourceNameAndDateBefore(abbr, source, timePeriod);
     }
 }

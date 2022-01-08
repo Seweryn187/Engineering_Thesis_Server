@@ -23,4 +23,10 @@ public class CurrentValueService {
         currentValueRepository.findAll().forEach(currentValuesList::add);
         return currentValuesList;
     }
+
+    public List<CurrentValue> getCurrentValuesBySourceName(String name) {
+        List<CurrentValue> currentValuesList = new ArrayList<>();
+        currentValueRepository.findCurrentValueBySourceName(name).forEach(currentValuesList::add);
+        return currentValuesList;
+    }
 }

@@ -7,16 +7,26 @@ public class EmailData {
     private String abbreviation;
     private String recipient;
     private String increase;
+    private String source;
 
     public EmailData() {
     }
 
-    public EmailData(int sellValue, int buyValue, String abbreviation, String recipient, String increase) {
+    public EmailData(int sellValue, int buyValue, String abbreviation, String recipient, String increase, String source) {
         this.sellValue = sellValue;
         this.buyValue = buyValue;
         this.abbreviation = abbreviation;
         this.recipient = recipient;
         this.increase = increase;
+        this.source = source;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public String getIncrease() {
@@ -67,6 +77,7 @@ public class EmailData {
                 ", abbreviation='" + abbreviation + '\'' +
                 ", recipient='" + recipient + '\'' +
                 ", increase='" + increase + '\'' +
+                ", source='" + source + '\'' +
                 '}';
     }
 }
