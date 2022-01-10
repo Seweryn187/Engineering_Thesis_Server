@@ -1,6 +1,8 @@
 package com.server.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "users")
@@ -10,18 +12,24 @@ public class User {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @NotEmpty(message = "Name can not be empty")
     @Column(name = "name", nullable = false)
     private String name;
 
+    @NotEmpty(message = "Surname can not be empty")
     @Column(name = "surname", nullable = false)
     private String surname;
 
+    @NotEmpty(message = "Email can not be empty")
+    @Email(message = "Please provide a valid email id")
     @Column(name = "email", nullable = false)
     private String email;
 
+    @NotEmpty(message = "Password can not be empty")
     @Column(name = "login", nullable = false)
     private String login;
 
+    @NotEmpty(message = "Password can not be empty")
     @Column(name = "password", nullable = false)
     private String password;
 

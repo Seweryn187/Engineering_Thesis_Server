@@ -59,7 +59,7 @@ public class FetchDataFromPolygon {
     start, in this case every day in working week at 2:00 am
     */
     @Transactional
-    @Scheduled(fixedDelay = 30000)
+    //@Scheduled(fixedDelay = 30000)
     public void saveNewCurrentValue() {
         CurrentValue newCurrentValue = new CurrentValue();
         int triesCount = 0;
