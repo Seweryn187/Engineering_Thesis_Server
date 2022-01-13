@@ -31,7 +31,6 @@ public class HistoricalValueController {
     @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
     @GetMapping("/historical-value/{abbr}/{source}")
     public List<HistoricalValue> getHistoricalValueByCurrencyAbbrAndSourceName(@PathVariable String abbr, @PathVariable String source) {
-        System.out.println(historicalValueService.getAllHistoricalValueByCurrencyAbbrAndSourceName(abbr, source));
         return historicalValueService.getAllHistoricalValueByCurrencyAbbrAndSourceName(abbr, source);
     }
 

@@ -1,19 +1,22 @@
 package com.server.controllers;
 
 import com.server.entities.Alert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.server.services.AlertService;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class AlertController {
 
     private final AlertService alertService;
+    private static final Logger log = LoggerFactory.getLogger(AlertController.class);
+
 
     @Autowired
     public AlertController(AlertService alertService) {
@@ -26,11 +29,6 @@ public class AlertController {
         return this.alertService.getAllAlerts();
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
-    @GetMapping("/alerts/{abbr}")
-    public List<Alert> getAlertsByCurrencyAbbr(@PathVariable String abbr) {
-        return this.alertService.getAllAlertsByCurrencyAbbr(abbr);
-    }
 
     @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
     @GetMapping("/alerts/{email}")
@@ -38,6 +36,28 @@ public class AlertController {
         return this.alertService.getAllAlertsByUserEmail(email);
     }
 
+    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @PostMapping("/alerts/add")
+    public Map<String, String> addNewAlert(@RequestBody Alert alert) {
+        if(this.alertService.addNewAlert(alert)){
+            log.info("Added alert: " + alert);
+            return Collections.singletonMap("response", "added");
+        }
+        else {
+            return Collections.singletonMap("response", "not");
+        }
+    }
 
+    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @DeleteMapping("/alerts/delete/{alertId}")
+    public Map<String, String> deleteAlert(@PathVariable Integer alertId) {
+        if(this.alertService.deleteAlert(alertId)){
+            log.info("Deleted alert with id: " + alertId);
+            return Collections.singletonMap("response", "deleted");
+        }
+        else {
+            return Collections.singletonMap("response", "not");
+        }
+    }
 
 }

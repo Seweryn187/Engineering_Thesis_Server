@@ -15,7 +15,7 @@ public class UserDetailsImpl implements UserDetails {
 
     private final Integer id;
 
-    private String username;
+    private final String username;
 
     private final String email;
 
@@ -59,7 +59,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return null;
+        return username;
     }
 
     @Override
