@@ -30,6 +30,7 @@ public class HistoricalValueService {
         List<HistoricalValue> historicalValuesListByCurrencyAbbrAndSourceName = new ArrayList<>();
         historicalValuesListByCurrencyAbbrAndSourceName.addAll(
                 historicalValueRepository.findHistoricalValueByCurrencyAbbrAndSourceName(abbr, source));
+
         return historicalValuesListByCurrencyAbbrAndSourceName;
     }
 

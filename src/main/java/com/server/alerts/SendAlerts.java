@@ -28,19 +28,34 @@ public class SendAlerts {
     @Transactional
     public void sendValueChangeAlerts(CurrentValue currentValueRecord, CurrentValue newValue) {
         for (Alert alert : this.alertRepository.findAlertByCurrencyAbbr(currentValueRecord.getCurrency().getAbbr())) {
-
-                EmailData emailData = new EmailData(
+            EmailData emailData;
+            if((alert.getAlertValue() < newValue.getBidValue() || alert.getAlertValue() < newValue.getAskValue()) && alert.getIncrease()){
+                 emailData = new EmailData(
                         newValue.getAskValue(),
                         newValue.getBidValue(),
                         currentValueRecord.getCurrency().getAbbr(),
                         alert.getUser().getEmail(),
-                        (alert.getIncrease() &&
-                                (alert.getAlertValue() < newValue.getBidValue() || alert.getAlertValue() < newValue.getAskValue()))? "increased" : "decreased",
+                        "increased",
                         newValue.getSource().getName());
                 publisher.publishEvent(new CurrentValueChangedEvent(emailData));
                 if(!alert.getRepeatable()){
                     alertRepository.delete(alert);
                 }
+            }
+            if((alert.getAlertValue() > newValue.getBidValue() || alert.getAlertValue() > newValue.getAskValue()) && !alert.getIncrease()){
+                 emailData = new EmailData(
+                        newValue.getAskValue(),
+                        newValue.getBidValue(),
+                        currentValueRecord.getCurrency().getAbbr(),
+                        alert.getUser().getEmail(),
+                        "decreased",
+                        newValue.getSource().getName());
+                publisher.publishEvent(new CurrentValueChangedEvent(emailData));
+                if(!alert.getRepeatable()){
+                    alertRepository.delete(alert);
+                }
+            }
+
             }
         }
 }

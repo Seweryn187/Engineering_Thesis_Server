@@ -40,8 +40,8 @@ public class AlertService {
         return true;
     }
 
-    public Boolean deleteAlert(Integer alertId) {
-        alertRepository.deleteById(alertId);
+    public Boolean deleteAlert(Integer alertValue, String email, String abbr) {
+        alertRepository.delete(alertRepository.findAlertByAlertValueAndUserEmailAndCurrencyAbbr(alertValue, email, abbr));
         return true;
     }
 

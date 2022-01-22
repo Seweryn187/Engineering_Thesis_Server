@@ -49,10 +49,10 @@ public class AlertController {
     }
 
     @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
-    @DeleteMapping("/alerts/delete/{alertId}")
-    public Map<String, String> deleteAlert(@PathVariable Integer alertId) {
-        if(this.alertService.deleteAlert(alertId)){
-            log.info("Deleted alert with id: " + alertId);
+    @DeleteMapping("/alerts/delete/{alertValue}/{email}/{abbr}")
+    public Map<String, String> deleteAlert(@PathVariable Integer alertValue, @PathVariable String email, @PathVariable String abbr) {
+        if(this.alertService.deleteAlert(alertValue, email, abbr)){
+            log.info("Deleted alert with parameters: " + alertValue + ", " + email + ", " + abbr);
             return Collections.singletonMap("response", "deleted");
         }
         else {

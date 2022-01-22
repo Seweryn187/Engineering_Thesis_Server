@@ -11,4 +11,5 @@ import java.util.List;
 public interface AlertRepository extends CrudRepository<Alert, Integer> {
     List<Alert> findAlertByCurrencyAbbr(String abbr);
     List<Alert> findAlertByUserEmail(String email);
+    Alert findAlertByAlertValueAndUserEmailAndCurrencyAbbr(Integer alertValue, String email, String abbr);
 }
