@@ -11,4 +11,5 @@ import java.util.List;
 public interface CurrentValueRepository extends CrudRepository<CurrentValue, Integer> {
 
     List<CurrentValue> findCurrentValueBySourceName(String name);
+    List<CurrentValue> findCurrentValueByCurrencyAbbr(String abbr);
 }

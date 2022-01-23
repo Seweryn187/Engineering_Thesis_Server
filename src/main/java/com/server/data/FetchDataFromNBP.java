@@ -1,33 +1,21 @@
 package com.server.data;
 
 import com.server.alerts.SendAlerts;
-import com.server.entities.Currency;
 import com.server.entities.CurrentValue;
-import com.server.entities.HistoricalValue;
 
-import com.server.utility.Utility;
-import io.netty.channel.ChannelOption;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.netty.http.client.HttpClient;
 import com.server.repositories.CurrencyRepository;
 import com.server.repositories.CurrentValueRepository;
-import com.server.repositories.HistoricalValueRepository;
 import com.server.response.NbpResponse;
 
-import java.time.Duration;
-
 import java.time.LocalDate;
-import java.util.concurrent.TimeUnit;
 
 import static com.server.utility.Utility.calculateSpread;
 import static com.server.utility.Utility.castFloatToInt;
@@ -38,18 +26,19 @@ public class FetchDataFromNBP {
 
     private final CurrencyRepository currencyRepository;
     private final CurrentValueRepository currentValueRepository;
-    private final HistoricalValueRepository historicalValueRepository;
+    private final ArchiveData archiveData;
+    private final FetchData fetchData;
     private final SendAlerts sendAlerts;
     private WebClient webClient;
 
-    private static final Logger log = LoggerFactory.getLogger(FetchDataFromNBP.class);
+    private static final Logger log = LoggerFactory.getLogger(FetchDataFromFcsApi.class);
 
     @Autowired
-    public FetchDataFromNBP(CurrencyRepository currencyRepository, CurrentValueRepository currentValueRepository,
-                            HistoricalValueRepository historicalValueRepository, SendAlerts sendAlerts) {
+    public FetchDataFromNBP(CurrencyRepository currencyRepository, CurrentValueRepository currentValueRepository, ArchiveData archiveData, FetchData fetchData, SendAlerts sendAlerts) {
         this.currencyRepository = currencyRepository;
         this.currentValueRepository = currentValueRepository;
-        this.historicalValueRepository = historicalValueRepository;
+        this.archiveData = archiveData;
+        this.fetchData = fetchData;
         this.sendAlerts = sendAlerts;
     }
 
@@ -58,7 +47,7 @@ public class FetchDataFromNBP {
     start, in this case every day in working week at 2:00 am
     */
     @Transactional
-    //@Scheduled(fixedDelay = 50000)
+    @Scheduled(fixedDelay = 50000)
     public void saveNewCurrentValue() {
         CurrentValue newCurrentValue = new CurrentValue();
         int triesCount = 0;
@@ -67,7 +56,7 @@ public class FetchDataFromNBP {
         long recordAmount;
         LocalDate localDate = LocalDate.now();
 
-        buildClient();
+        webClient = fetchData.buildClient("https://api.nbp.pl/api/exchangerates/rates/");
         recordAmount = this.currencyRepository.count();
         while(triesCount < maxTries) {
             try {
@@ -76,8 +65,8 @@ public class FetchDataFromNBP {
                 for (CurrentValue record : this.currentValueRepository.findCurrentValueBySourceName("The National Bank of Poland")) {
                     NbpResponse response = getCurrentValueFromNBP(record);
                     if (response != null) {
-                        if(response.getRates().get(0).getEffectiveDate().getDayOfMonth() != record.getDate().getDayOfMonth()){
-                            archiveCurrentValue(record);
+                        if(response.getRates().get(0).getEffectiveDate().getDayOfWeek() != record.getDate().getDayOfWeek()){
+                            archiveData.archiveCurrentValue(record);
                         }
 
                         newCurrentValue.setId(record.getId());
@@ -94,6 +83,7 @@ public class FetchDataFromNBP {
                         newCurrentValue.setAskIncrease(record.getAskValue() < response.getRates().get(0).getAsk());
                         newCurrentValue.setBidIncrease(record.getBidValue() < response.getRates().get(0).getBid());
                         newCurrentValue.setCurrency(record.getCurrency());
+                        newCurrentValue.setBestPrice(false);
 
                         CurrentValue addedValue = this.currentValueRepository.save(newCurrentValue);
                         sendAlerts.sendValueChangeAlerts(record, newCurrentValue);
@@ -114,22 +104,8 @@ public class FetchDataFromNBP {
             }
 
         }
+        fetchData.checkBestSpread(currentValueRepository, currencyRepository);
 
-
-    }
-
-    public void buildClient() {
-        HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofMillis(5000))
-                .doOnConnected(conn ->
-                        conn.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
-                                .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
-
-        webClient = WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .baseUrl("https://api.nbp.pl/api/exchangerates/rates/")
-                .build();
     }
 
     public NbpResponse getCurrentValueFromNBP(CurrentValue record) {
@@ -142,35 +118,7 @@ public class FetchDataFromNBP {
                 .block();
     }
 
-    @Transactional
-    public void archiveCurrentValue(CurrentValue record) {
-        int count = 0;
-        int maxTries = 3;
 
-        while(count < maxTries) {
-            try {
-                if (record != null) {
-                    HistoricalValue oldValue = new HistoricalValue();
-                    oldValue.setMeanValue(record.getMeanValue());
-                    oldValue.setMeanBidValue(record.getBidValue());
-                    oldValue.setMeanAskValue(record.getAskValue());
-                    oldValue.setSource(record.getSource());
-                    oldValue.setCurrency(record.getCurrency());
-                    oldValue.setDate(record.getDate());
-                    oldValue.setSpread(record.getSpread());
-
-                    HistoricalValue archivedRecord = this.historicalValueRepository.save(oldValue);
-                    log.info("I've archived value: " + archivedRecord);
-                    if(archivedRecord != null){
-                        break;
-                    }
-                }
-            } catch (Exception ex) {
-                log.error("Error archiving value in database: " + ex.getMessage());
-                if(++count == maxTries) throw ex;
-            }
-        }
-    }
 
 
 }

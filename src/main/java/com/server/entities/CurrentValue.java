@@ -36,6 +36,9 @@ public class CurrentValue {
     @Column(name = "bid_increase")
     private Boolean bidIncrease;
 
+    @Column(name = "best_price")
+    private Boolean bestPrice;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "currency_id", nullable = false)
     private Currency currency;
@@ -44,7 +47,7 @@ public class CurrentValue {
 
     }
 
-    public CurrentValue(Integer id, Integer askValue, Integer bidValue, Source source, Integer meanValue, LocalDate date, Integer spread, Boolean askIncrease, Boolean bidIncrease, Currency currency) {
+    public CurrentValue(Integer id, Integer askValue, Integer bidValue, Source source, Integer meanValue, LocalDate date, Integer spread, Boolean askIncrease, Boolean bidIncrease, Boolean bestPrice, Currency currency) {
         this.id = id;
         this.askValue = askValue;
         this.bidValue = bidValue;
@@ -54,6 +57,7 @@ public class CurrentValue {
         this.spread = spread;
         this.askIncrease = askIncrease;
         this.bidIncrease = bidIncrease;
+        this.bestPrice = bestPrice;
         this.currency = currency;
     }
 
@@ -137,6 +141,14 @@ public class CurrentValue {
         this.bidIncrease = bidIncrease;
     }
 
+    public Boolean getBestPrice() {
+        return bestPrice;
+    }
+
+    public void setBestPrice(Boolean bestPrice) {
+        this.bestPrice = bestPrice;
+    }
+
     @Override
     public String toString() {
         return "CurrentValue{" +
@@ -149,6 +161,7 @@ public class CurrentValue {
                 ", spread=" + spread +
                 ", askIncrease=" + askIncrease +
                 ", bidIncrease=" + bidIncrease +
+                ", bestPrice=" + bestPrice +
                 ", currency=" + currency +
                 '}';
     }
