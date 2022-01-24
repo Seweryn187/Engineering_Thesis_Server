@@ -2,7 +2,7 @@ package com.server.response;
 
 import java.sql.Timestamp;
 
-public class FcsapiResponse {
+public class FcsApiResponse {
     private String s;
     private float o;
     private float h;
@@ -13,7 +13,7 @@ public class FcsapiResponse {
     private float sp;
     private Timestamp t;
 
-    public FcsapiResponse(String s, float o, float h, float l, float c, float a, float b, float sp, Timestamp t) {
+    public FcsApiResponse(String s, float o, float h, float l, float c, float a, float b, float sp, Timestamp t) {
         this.s = s;
         this.o = o;
         this.h = h;
@@ -25,7 +25,7 @@ public class FcsapiResponse {
         this.t = t;
     }
 
-    public FcsapiResponse() {
+    public FcsApiResponse() {
     }
 
     public String getS() {

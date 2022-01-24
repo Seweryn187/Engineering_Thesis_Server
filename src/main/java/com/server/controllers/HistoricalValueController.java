@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.server.services.HistoricalValueService;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -29,16 +30,15 @@ public class HistoricalValueController {
     }
 
     @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
-    @GetMapping("/historical-value/{abbr}/{source}")
+    @GetMapping("/historical-value/{abbr}/{source}/month")
     public List<HistoricalValue> getHistoricalValueByCurrencyAbbrAndSourceName(@PathVariable String abbr, @PathVariable String source) {
-        return historicalValueService.getAllHistoricalValueByCurrencyAbbrAndSourceName(abbr, source);
+        return historicalValueService.findHistoricalValueByCurrencyAbbrAndSourceNameAndDateBetween(abbr, source, LocalDate.now().minus(1, ChronoUnit.MONTHS));
     }
 
     @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
-    @GetMapping("/historical-value/{abbr}/{source}/time")
-    public List<HistoricalValue> getAllHistoricalValueByCurrencyAbbrAndSourceNameAndDateBefore(@PathVariable String abbr,
-                                                                                          @PathVariable String source,
-                                                                                          LocalDate timePeriod) {
-        return historicalValueService.getAllHistoricalValueByCurrencyAbbrAndSourceNameAndDateBefore(abbr, source, timePeriod);
+    @GetMapping("/historical-value/{abbr}/{source}/year")
+    public List<HistoricalValue> getAllHistoricalValueByCurrencyAbbrAndSourceNameAndDateAfter(@PathVariable String abbr,
+                                                                                          @PathVariable String source) {
+        return historicalValueService.findHistoricalValueByCurrencyAbbrAndSourceNameAndDateBetween(abbr, source, LocalDate.now().minus(1, ChronoUnit.YEARS));
     }
 }

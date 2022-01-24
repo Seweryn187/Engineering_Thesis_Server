@@ -3,6 +3,7 @@ package com.server.data;
 import com.server.alerts.SendAlerts;
 import com.server.entities.CurrentValue;
 
+import org.apache.tomcat.jni.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,11 @@ import com.server.repositories.CurrentValueRepository;
 import com.server.response.NbpResponse;
 
 import java.time.LocalDate;
+import java.time.Month;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.server.utility.Utility.calculateSpread;
 import static com.server.utility.Utility.castFloatToInt;
@@ -47,7 +53,7 @@ public class FetchDataFromNBP {
     start, in this case every day in working week at 2:00 am
     */
     @Transactional
-    @Scheduled(fixedDelay = 50000)
+    //@Scheduled(fixedDelay = 500000000)
     public void saveNewCurrentValue() {
         CurrentValue newCurrentValue = new CurrentValue();
         int triesCount = 0;
@@ -105,14 +111,13 @@ public class FetchDataFromNBP {
 
         }
         fetchData.checkBestSpread(currentValueRepository, currencyRepository);
-
     }
 
     public NbpResponse getCurrentValueFromNBP(CurrentValue record) {
         String table = "c/"; // it comes from the structure of api request of NBP, this table has bought and sell value
         String format = "?format=json";
         return webClient.get()
-                .uri(table + record.getCurrency().getAbbr() + "/" + format)
+                .uri(table + record.getCurrency().getAbbr()+ "/" + format)
                 .retrieve()
                 .bodyToMono(NbpResponse.class)
                 .block();

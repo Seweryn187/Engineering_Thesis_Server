@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 public class FcsApi {
     private String status;
-    private FcsapiResponse[] response;
+    private FcsApiResponse[] response;
 
-    public FcsApi(String status, FcsapiResponse[] response) {
+    public FcsApi(String status, FcsApiResponse[] response) {
         this.status = status;
         this.response = response;
     }
@@ -22,11 +22,11 @@ public class FcsApi {
         this.status = status;
     }
 
-    public FcsapiResponse[] getResponse() {
+    public FcsApiResponse[] getResponse() {
         return response;
     }
 
-    public void setResponse(FcsapiResponse[] response) {
+    public void setResponse(FcsApiResponse[] response) {
         this.response = response;
     }
 

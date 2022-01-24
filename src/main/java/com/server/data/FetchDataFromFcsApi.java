@@ -57,7 +57,7 @@ public class FetchDataFromFcsApi {
         CurrentValue newCurrentValue = new CurrentValue();
         int triesCount = 0;
         int maxTries = 3;
-        int recordCount = 0;
+        int recordCount = 1;
         long recordAmount;
         LocalDate localDate = LocalDate.now();
 
@@ -107,7 +107,7 @@ public class FetchDataFromFcsApi {
                     }
                 }
                 log.info("-------------------End--------------------");
-                if(recordCount == recordAmount){
+                if(recordCount == recordAmount+1){
                     break;
                 }
             } catch (Exception ex) {

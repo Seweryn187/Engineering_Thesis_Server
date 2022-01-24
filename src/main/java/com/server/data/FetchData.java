@@ -7,7 +7,6 @@ import com.server.repositories.CurrentValueRepository;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -37,6 +36,7 @@ public class FetchData {
     }
 
     public void checkBestSpread(CurrentValueRepository currentValueRepository, CurrencyRepository currencyRepository) {
+        currentValueRepository.findAll().forEach(data -> data.setBestPrice(false));
         for (Currency currencyRecord : currencyRepository.findAll()){
             List<CurrentValue> currentValueList = currentValueRepository.findCurrentValueByCurrencyAbbr(currencyRecord.getAbbr());
             CurrentValue minSpread = currentValueList

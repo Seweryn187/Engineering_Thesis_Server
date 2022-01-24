@@ -56,7 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers("/user/sign-in", "/user/register", "/current-values/{name}",
                         "/current-values", "/sources", "/currencies", "/historical-value/{abbr}/{source}",
-                        "/historical-value/{abbr}/{source}/time").permitAll()
+                        "/historical-value/{abbr}/{source}/month", "/historical-value/{abbr}/{source}/year").permitAll()
                 .antMatchers().permitAll()
                 .anyRequest().authenticated();
 

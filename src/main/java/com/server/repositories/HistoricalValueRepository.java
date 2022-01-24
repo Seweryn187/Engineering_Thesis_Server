@@ -5,12 +5,13 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Repository
 public interface HistoricalValueRepository extends CrudRepository<HistoricalValue, Integer> {
     List<HistoricalValue> findHistoricalValueByCurrencyAbbr(String abbr);
     List<HistoricalValue> findHistoricalValueByCurrencyAbbrAndSourceName(String abbr, String name);
-    List<HistoricalValue> findHistoricalValueByCurrencyAbbrAndSourceNameAndDateBefore(String abbr, String name,
-                                                                                    LocalDate timePeriod);
+    List<HistoricalValue> findHistoricalValueByCurrencyAbbrAndSourceNameAndDateAfter(String abbr, String name,
+                                                                                       LocalDate after);
 }
