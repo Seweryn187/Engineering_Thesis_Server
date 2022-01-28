@@ -1,6 +1,7 @@
 package com.server.controllers;
 
 import com.server.entities.Alert;
+import com.server.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,20 +24,20 @@ public class AlertController {
         this.alertService = alertService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/alerts")
     public List<Alert> getAllAlerts() {
         return this.alertService.getAllAlerts();
     }
 
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/alerts/{email}")
     public List<Alert> getAlertsByUserEmail(@PathVariable String email) {
         return this.alertService.getAllAlertsByUserEmail(email);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @PostMapping("/alerts/add")
     public Map<String, String> addNewAlert(@RequestBody Alert alert) {
         if(this.alertService.addNewAlert(alert)){
@@ -48,7 +49,7 @@ public class AlertController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @DeleteMapping("/alerts/delete/{alertValue}/{email}/{abbr}")
     public Map<String, String> deleteAlert(@PathVariable Integer alertValue, @PathVariable String email, @PathVariable String abbr) {
         if(this.alertService.deleteAlert(alertValue, email, abbr)){

@@ -36,6 +36,7 @@ public class FetchDataFromNBP {
     private final FetchData fetchData;
     private final SendAlerts sendAlerts;
     private WebClient webClient;
+    private int count = 1;
 
     private static final Logger log = LoggerFactory.getLogger(FetchDataFromFcsApi.class);
 
@@ -53,7 +54,7 @@ public class FetchDataFromNBP {
     start, in this case every day in working week at 2:00 am
     */
     @Transactional
-    //@Scheduled(fixedDelay = 500000000)
+    //@Scheduled(fixedDelay = 1000000)
     public void saveNewCurrentValue() {
         CurrentValue newCurrentValue = new CurrentValue();
         int triesCount = 0;
@@ -66,14 +67,16 @@ public class FetchDataFromNBP {
         recordAmount = this.currencyRepository.count();
         while(triesCount < maxTries) {
             try {
+                log.info("-------------Amount of calls:" + count + " --------------------------------");
                 log.info("-------------Getting new value and archiving old one (Sync)----------------");
 
                 for (CurrentValue record : this.currentValueRepository.findCurrentValueBySourceName("The National Bank of Poland")) {
                     NbpResponse response = getCurrentValueFromNBP(record);
                     if (response != null) {
-                        if(response.getRates().get(0).getEffectiveDate().getDayOfWeek() != record.getDate().getDayOfWeek()){
+                        if(response.getRates().get(0).getEffectiveDate().getDayOfWeek() != record.getDate().getDayOfWeek()) {
                             archiveData.archiveCurrentValue(record);
                         }
+
 
                         newCurrentValue.setId(record.getId());
                         newCurrentValue.setBidValue(castFloatToInt(response.getRates().get(0).getBid())); // Because in database I'm saving integer not a float value
@@ -110,7 +113,9 @@ public class FetchDataFromNBP {
             }
 
         }
+        count += 1;
         fetchData.checkBestSpread(currentValueRepository, currencyRepository);
+
     }
 
     public NbpResponse getCurrentValueFromNBP(CurrentValue record) {

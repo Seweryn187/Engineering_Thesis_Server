@@ -1,6 +1,7 @@
 package com.server.controllers;
 
 import com.server.entities.CurrentValue;
+import com.server.utility.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,15 +21,21 @@ public class CurrentValueController {
         this.currentValueService = currentValueService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/current-values")
     public List<CurrentValue> getAllCurrentValues() {
         return this.currentValueService.getAllCurrentValues();
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/current-values/{name}")
     public List<CurrentValue> getCurrentValueBySourceName(@PathVariable String name) {
         return this.currentValueService.getCurrentValuesBySourceName(name);
+    }
+
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
+    @GetMapping("/current-values/best-price")
+    public List<CurrentValue> getCurrentValueByBestPrice() {
+        return this.currentValueService.getCurrentValuesByBestPrice();
     }
 }

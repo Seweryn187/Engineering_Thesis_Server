@@ -12,4 +12,5 @@ public interface CurrentValueRepository extends CrudRepository<CurrentValue, Int
 
     List<CurrentValue> findCurrentValueBySourceName(String name);
     List<CurrentValue> findCurrentValueByCurrencyAbbr(String abbr);
+    List<CurrentValue> findCurrentValueByBestPrice(boolean bestPrice);
 }

@@ -2,6 +2,8 @@ package com.server.utility;
 
 public class Utility {
 
+    public final static  String serverUrl = "*";
+
     public static int castFloatToInt(float value) {
         return (int) (value * 1000);
     }

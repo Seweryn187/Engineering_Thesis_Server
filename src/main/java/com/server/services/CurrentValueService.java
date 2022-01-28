@@ -29,4 +29,10 @@ public class CurrentValueService {
         currentValueRepository.findCurrentValueBySourceName(name).forEach(currentValuesList::add);
         return currentValuesList;
     }
+
+    public List<CurrentValue> getCurrentValuesByBestPrice() {
+        List<CurrentValue> currentValuesList = new ArrayList<>();
+        currentValueRepository.findCurrentValueByBestPrice(true).forEach(currentValuesList::add);
+        return currentValuesList;
+    }
 }

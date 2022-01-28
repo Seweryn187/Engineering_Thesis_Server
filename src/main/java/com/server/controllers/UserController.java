@@ -5,6 +5,7 @@ import com.server.request.SignInRequest;
 import com.server.security.UserDetailsImpl;
 import com.server.security.jwt.JwtUtils;
 import com.server.response.JwtResponse;
+import com.server.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,20 +41,20 @@ public class UserController {
         this.authenticationManager = authenticationManager;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/users")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/user/{email}")
     public User getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @PostMapping("/user/register")
     public Map<String, String> registerUser(final @RequestBody @Valid User userData, final BindingResult bindingResult) {
         if(bindingResult.hasErrors()){
@@ -67,7 +68,7 @@ public class UserController {
         return Collections.singletonMap("response", "sign-in");
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @PostMapping("user/sign-in")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody SignInRequest signInRequest) {
 
@@ -85,7 +86,7 @@ public class UserController {
         ));
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @DeleteMapping("/user/delete/{email}")
     public void deleteUserByEmail(@PathVariable String email) {
         if(userService.deleteUserByEmail(email) == 1){
@@ -93,7 +94,7 @@ public class UserController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @PatchMapping("/user/update/{email}")
     public Map<String, String> updateUserByEmail(@PathVariable String email, @RequestBody User updatedData){
         User user = userService.getUserByEmail(email);

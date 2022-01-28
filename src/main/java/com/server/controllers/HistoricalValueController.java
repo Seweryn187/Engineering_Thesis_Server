@@ -1,6 +1,7 @@
 package com.server.controllers;
 
 import com.server.entities.HistoricalValue;
+import com.server.utility.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,19 +24,19 @@ public class HistoricalValueController {
         this.historicalValueService = historicalValueService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/historical-value/{abbr}")
     public List<HistoricalValue> getHistoricalValueByCurrencyAbbr(@PathVariable String abbr) {
         return historicalValueService.getAllHistoricalValueByCurrencyAbbr(abbr);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/historical-value/{abbr}/{source}/month")
     public List<HistoricalValue> getHistoricalValueByCurrencyAbbrAndSourceName(@PathVariable String abbr, @PathVariable String source) {
         return historicalValueService.findHistoricalValueByCurrencyAbbrAndSourceNameAndDateBetween(abbr, source, LocalDate.now().minus(1, ChronoUnit.MONTHS));
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/historical-value/{abbr}/{source}/year")
     public List<HistoricalValue> getAllHistoricalValueByCurrencyAbbrAndSourceNameAndDateAfter(@PathVariable String abbr,
                                                                                           @PathVariable String source) {

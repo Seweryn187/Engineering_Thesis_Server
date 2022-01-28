@@ -1,6 +1,7 @@
 package com.server.controllers;
 
 import com.server.entities.Currency;
+import com.server.utility.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ public class CurrencyController {
         this.currencyService = currencyService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/currencies")
     public List<Currency> getAllCurrencies() {
         return this.currencyService.getAllCurrencies();

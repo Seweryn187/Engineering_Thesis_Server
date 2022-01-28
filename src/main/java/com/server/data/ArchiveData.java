@@ -24,6 +24,7 @@ public class ArchiveData {
     public void archiveCurrentValue(CurrentValue record) {
         int count = 0;
         int maxTries = 3;
+        long start1 = System.currentTimeMillis();
 
         while(count < maxTries) {
             try {
@@ -48,5 +49,7 @@ public class ArchiveData {
                 if(++count == maxTries) throw ex;
             }
         }
+        long end1 = System.currentTimeMillis();
+        log.info("-----------------Elapsed time in milliseconds seconds: "+ (end1-start1) + " ------------------------------------");
     }
 }

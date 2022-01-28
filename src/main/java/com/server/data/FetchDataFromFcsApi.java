@@ -68,7 +68,7 @@ public class FetchDataFromFcsApi {
             try {
                 log.info("-------------Getting new value and archiving old one (Sync)----------------");
                 for (CurrentValue record : this.currentValueRepository.findCurrentValueBySourceName("Fcs API")) {
-                    if(recordCount%3 == 0){ // because api which I'm using only allows 5 requests per minute
+                    if(recordCount%3 == 0){ // because api which I'm using only allows 3 requests per minute
                         try {
                             TimeUnit.MINUTES.sleep(1);
                         } catch (InterruptedException ie) {

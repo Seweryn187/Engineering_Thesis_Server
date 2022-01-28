@@ -1,6 +1,7 @@
 package com.server.controllers;
 
 import com.server.entities.Source;
+import com.server.utility.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,7 @@ public class SourceController {
         this.sourceService = sourceService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+    @CrossOrigin(origins = Utility.serverUrl, maxAge = 3600)
     @GetMapping("/sources")
     public List<Source> getAllSources() {
         return sourceService.getAllSources();
